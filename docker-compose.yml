@@ -1,0 +1,21 @@
+version: '3'
+services:
+    dictionary_npd:
+        build: .
+        volumes:
+            - ./dictionary_npd:/dictionary_npd
+        ports:
+            - "5000:5000"
+        depends_on:
+            - mongodb
+    mongodb:
+        image: mongo
+        container_name: mongodb
+        volumes:
+            - ./database:/data/db
+        environment:
+            - PUID=1000
+            - PGID=1000
+        ports:
+            - 27017:27017
+        restart: unless-stopped

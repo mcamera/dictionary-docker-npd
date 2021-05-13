@@ -1,0 +1,102 @@
+{% extends 'layout/menu.html' %}
+{% block title %}View {{dict}}{% endblock %}
+{% block body %}
+    <div id="table" style="margin-left: 10px; margin-right: 10px;">
+        <div class="row">
+            <div class="col s8 right_">
+                <h1>{{dict}}</h1><br class="print"><br class="print"><br class="print">
+                <i>Total of variables: {{total_variable}}</i>
+            </div>
+            <div class="col s4">
+                <img class="print" id="logo" src="/static/img/logo-cidacs.svg" >
+            </div>  
+        </div>
+        <table class="responsive-table highlight tborder" id="printJS-dic">
+            <thead>
+                <tr>
+                    <th>Variable</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Categories</th>
+                    <th>External Comments</th>
+                    <th class="no-print">Internal Comments</th>
+                    <th class="no-print"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for x in range(total_variable) %}
+                <tr> 
+                    <td>{{variables[x].variable}}</td>
+                    <td class="table-max">{{variables[x].description}}</td>
+                    <td > {{variables[x].type}}</td>
+                    {% if cat[x] != {  } %}
+                    <td>
+                        <ul>
+
+                            <li>0 - Nulo</li>
+                            {% for categories in cat[x]  %}
+                            <li>{{categories}} - {{cat[x][categories]}}</li>
+                            {% endfor %}
+                            <li>99 - Inconsistência</li>
+                        </ul>
+                    </td> 
+                    {% else %}
+                    <td></td>
+                    {% endif %}
+                    <td class="table-max"> {{variables[x].external_comment}}</td>
+                    <td class="table-max no-print"> {{variables[x].comment}}</td>
+                    <td class="no-print col s3">
+                        <div class="row">
+                            <div class="col s6">
+                                <form action="{{ url_for('edit_variable') }}" method="post" class="pull-right">
+                                    <input type="hidden" name="id" value="{{dict}} {{ variables[x]._id }}">
+                                    <input type="submit" class="btn"  value="Edit">
+                                </form>
+                            </div>
+                            <div class="col s6">
+                                <a class="btn red modal-trigger" href="#{{variables[x]._id}}" >Delete</a>
+                                <div id="{{variables[x]._id}}" class="modal bottom-sheet">
+                                    <div class="modal-content">
+                                        <h4>Are you sure you want to delete a variable {{variables[x].variable}}?</h4>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form action="{{ url_for('variable_delete') }}" method="post" class="pull-right">
+                                            <input type="hidden" name="id" value="{{dict}} {{ variables[x]._id }}">
+                                            <div class="row left">
+                                                <div class="col s6">
+                                                    <input type="submit" class="btn red modal-close" value="Yes" style="margin-left: 20px;">
+                                                </div>
+                                                <div class="col s6">
+                                                    <a href="#!" class="modal-close waves-effect waves-green btn-flat" style="margin-right: 30px;">No</a>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>  
+                {% endfor %}  
+            </tbody>
+        </table>
+        <form action="{{ url_for('add_variable') }}" method="post"> 
+            <input type="hidden" name="id" value="{{dict}}">
+            <input type="submit" class="btn right no-print blue" value="Add Variable" style="margin-top: 20px !important; margin-left: 10px; margin-bottom: 20px !important;">
+        </form>
+        <button type="button" onclick="printJS()"
+        class="btn-print btn deep-orange darken-4 right no-print" style="margin-top: 20px !important;">
+                Print Dictionary PDF
+        </button>
+        <form action="{{ url_for('to_csv_final') }}" method="post"> 
+            <input type="hidden" name="id" value="{{dict}}">
+            <input type="submit" class="btn right no-print green" value="Print Dictionary CSV" style="margin-top: 20px !important; margin-left: 10px; margin-bottom: 20px !important; margin-right: 10px;">
+        </form>
+        <form action="{{ url_for('pandas_to_csv') }}" method="post" style="margin-right: 25px;">
+            <input type="hidden" name="id" value="{{ dict }}">
+            <input type="submit" class="btn indigo darken-4 right no-print"  value="Create Standardization" onclick="alert('Created CSV dictionary successfully!')" style="margin-top: 20px;">
+        </form>
+    </div>
+    <script type="text/javascript" src="static/js/print.js"></script>
+    <script type="text/javascript" src="static/lib/js/materialize.min.js"></script>
+{% endblock %}

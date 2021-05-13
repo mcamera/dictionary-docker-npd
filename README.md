@@ -1,94 +1,159 @@
-# Dictionary App
+# Dictionary App (Docker dev environment)
 
-Debug Mode:
-```
-$ pip install Flask
-$ python -m pip install pymongo
-$ pip install pandas
-$ export FLASK_ENV=development
-$ flask run
+<p align="center">
+  <img src="./images/dict-docker-mongodb.png" alt="Home"width="80%">
+</p>
 
-```
+This project aims to deploy the application [Dictionary](https://github.com/cidacslab/dictionary-npd), from [CIDACS](https://cidacs.bahia.fiocruz.br/), in a Docker environment. The main objective is to create a developer environment for tests in a local network.
 
-## Important Sources
+## Topology
 
-- <a href="http://flask.pocoo.org/">Flask</a>
-- <a href="https://www.mongodb.com/download-center/community">MongoDB (Download)</a> 
-- <a href="https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/">MongoDB (Install in Red Hat Enterprise or CentOS Linux)</a>
-- <a href="https://api.mongodb.com/python/current/">PyMongo</a>
-- <a href="https://pandas.pydata.org/pandas-docs/stable/">Pandas</a>
+This Docker application will start these two containers:
 
-## Apache Web Service
-```
-$ sudo yum -y install httpd (Exemple for Red Hat Enterprise or CentOS Linux)
-$ yum install mod_wsgi
-```
-- <a href="https://flask.palletsprojects.com/en/1.1.x/deploying/mod_wsgi/">Mod_wsgi (Apache)</a>
+1. Application Dictionary (Python 2.7/Flask)
+2. Mongodb database
 
-## Packages
-<a href="https://github.com/cidacslab/dictionary-npd/blob/master/requirements.txt">Requirements</a>
+## Requisites
 
-Run 
-```
-$ pip install -r requirements.txt (Python 2)
-$ pip3 install -r requirements.txt (Python 3)
-```
+### Docker:
+- Docker: Version: 20.10.6 / API version: 1.41 / Go version: go1.13.15
+- Docker-compose: Version 1.25.0 / docker-py version: 4.1.0 / CPython version: 3.8.5
 
-## The App
+You will have to install the Docker and the Docker-compose, but it doesn't need to be the exact version as above. Just in case of need.
+If you are new in Docker applications, this website will help you:
+  - Install Docker [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
+  - Install Docker-compose: [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)
 
-### Home
+### Dictionary Application:
+- Python: 2.7
+- Flask: 1.0.2
+- Click: 7.0
+- itsdangerous:1.1.0
+- Jinja2: 2.10.1
+- MarkupSafe: 1.1.1
+- Werkzeug: 0.15.3
+- pandas: 0.22.0
+- pymongo: 3.8.0
 
-![alt text](https://github.com/cidacslab/dictionary-npd/blob/master/images/home.png)
+These are the same requirements as the developer have used to build the application. None of them was changed. It isn't the purpose of this project, but a refactory is recommended, since the Python 2.7 is deprecate
 
-Initial application form where the variables that compose the dictionary are released.
-- Dictionary's Name
-- Variable's name
-- Type [Byte, Date, Integer, Long, String, Double]
-- Description: Description about the variable
-- Internal Comments: Internal comments that will not be in the dictionary of the researchers.
-- External Comments: External comments that will be in the dictionary of the researchers.
-- Add: add variable to dictionary (save cache)
-- Submit: Create the dictionary and add dictionary variables to the database.
+## Running the environment with just one command:
 
 ```
-Note: First you must click on add, then click on submit.
+$ sudo docker-compose up
 ```
-![alt text](https://github.com/cidacslab/dictionary-npd/blob/master/images/home-byte.png)
+That's all that you need! Just type it in your terminal! Make sure that you are inside the home path of this project.
 
-The byte type also has the fields:
-- Category's Name
-- Original Value
-- Standardized Value
+The Docker will do all the harder tasks!
+
+But, if you have changed any Dockerfiles after the first running, maybe you should run this one:
 
 ```
-Note: Does not need to include 0-Nulo and 99-Inconsistência values
+$ sudo docker-compose up --build
 ```
-### List of Dictionaries
+This command ensures that all the image will be built from the changes already done.
 
-![alt text](https://github.com/cidacslab/dictionary-npd/blob/master/images/lista_dicionarios.png)
 
-Lists all dictionaries included in the database.
-- Create: Creates a csv file used for the base standardization process.
-- Edit: Opened a list of variables contained in the dictionary for viewing and possible editing.
+## How to use the application?
+```
+http://0.0.0.0:5000
+```
+Simple as it should be!
+
+## Inside the container
+If you want to have the full access to the application container, with a bash shell, just follow these steps:
+
+1. Open a new terminal.
+2. Type the command below to know the ID of the container.
+```
+$ sudo docker ps
+```
+3. With the ID, the command below will give you access to a shell inside the container (6c4fd7d9cc4a is an example of ID):
+```
+$ sudo docker exec -it 6c4 /bin/bash
+```
+<img src="./images/cmd-docker-exec.png" alt="Docker ps">
+
+## More environment tips
+- All content of the directory /dictionary_npd is mirrored (bind volume) with the same directory inside the container.
+- All the files from the database mongodb (/data/db) are mirrored with the directory (/database) in the application home path. Even if the container is stopped, the files will be persist in this folder.
+- All .csv files generated by the application will be save in the directory /files.
+
+## Using the Dictionary Application
+
+The dictionary has some functions:
+  - Adds a new dictionary
+  - Lists the existing dictionaries
+  - Lists the variables from a dictionary
+  - Exports the dictionary to .csv format
+  - Prints the dictionary to .pdf format
+
+### Adding a new dictionary
+
+<p align="center">
+  <img src="./images/home.png" alt="Home" width="80%">
+</p>
+
+This is the home page of the application. Here you be able to create a new dictionary.
+1. Dictionary's Name (mandatory): name of the dictionary.
+2. Variable's name (mandatory): name of the variable.
+3. Type (mandatory): Define the type of the variable, based in the following types:
+    - Byte
+      - Category's Name
+      - Original Value
+      - Standardized Value
+    - Date
+    - Integer
+    - Long
+    - String
+    - Double
+    ```
+    Note: You don't need to include the values: "0-Nulo" and "99-Inconsistência".
+    ```
+4. Description (highly recommended): Description about the variable.
+5. Internal Comments (optional): Internal comments that will not be in the dictionary of the researchers.
+6. External Comments (optional): External comments that will be in the dictionary of the researchers.
+7. Add: Adds the variable to dictionary (save cache).
+8. Submit: Creates the dictionary and add dictionary variables to the database.
+
+    ```
+    Note: You can add as much variable as necessary. 
+    ```
+
+### Listing the Dictionaries early saved
+
+<p align="center">
+  <img src="./images/lista_dicionarios0.png" alt="List dictionaries" width="80%">
+</p>
+
+Lists all the dictionaries included in the database.
+
+- Edit: Open a list of variables of the dictionary for viewing and editing.
 - Delete: Deletes the dictionary from the database.
 
 ### List of Variables
 
-![alt text](https://github.com/cidacslab/dictionary-npd/blob/master/images/lista-variaveis.png)
+<p align="center">
+  <img src="./images/lista-variaveis.png" alt="List variables" width="80%">
+</p>
 
 Shows a preview of the variables contained in the dictionary.
 
-- Edit: Editing a variable
+- Edit: Edits a variable
 - Delete: Deletes a variable from the database.
-- Print Dictionary CSV: Create a dictionary version for the researcher in CSV.
-- Print Dictionary PDF: Create a dictionary version for the researcher in PDF.
+- Print Dictionary CSV: Creates a dictionary version for the researcher in CSV.
+- Print Dictionary PDF: Creates a dictionary version for the researcher in PDF.
 - Add Variable: Adds a new variable in the dictionary.
 
-### Exemple of Dictionary in PDF
+### Example of Dictionary in PDF
 
-![alt text](https://github.com/cidacslab/dictionary-npd/blob/master/images/dicionario_pdf.png)
+<p align="center">
+  <img src="./images/dicionario_pdf.png" alt="Print PDF" width="80%">
+</p>
 
-### Exemple the App
 
-![alt text](https://github.com/cidacslab/dictionary-npd/blob/master/images/exemplo.gif)
+### Example of use
 
+<p align="center">
+  <img src="./images/exemplo.gif" alt="Example of use" width="80%">
+</p>
